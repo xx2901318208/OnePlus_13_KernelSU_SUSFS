@@ -115,7 +115,7 @@ jobs:
          #   kernel_version: "6.1"
            - model: gt5pro
              soc: pineapple
-             branch: realme/SM8650
+             branch: realme/sm8650
              manifest: gt5pro.xml
              android_version: android14
              kernel_version: "6.1"
