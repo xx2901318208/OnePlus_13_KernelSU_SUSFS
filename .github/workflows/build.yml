@@ -114,7 +114,7 @@ jobs:
           $REPO --trace sync -c --no-clone-bundle --no-tags --optimized-fetch -j$(nproc --all) --fail-fast
 
       - name: Compress original kernel source
-        if: ${{ inputs.make_release == false && inputs.model == 'OP13' }}
+        if: ${{ inputs.make_release == false && inputs.model == 'gt5pro' }}
         run: |
           echo "Preparing kernel source: $CONFIG"
           cd "$GITHUB_WORKSPACE"
