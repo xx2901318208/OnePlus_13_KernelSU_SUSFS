@@ -107,8 +107,7 @@ jobs:
           
           # Initialize and sync kernel source
           echo "Initializing and syncing kernel source..."
-          $REPO init -u https://github.com/xx2901318208/kernel_manifest/tree/realme/sm8650 -m gt5pro.xml --depth=1 --no-clone-bundle --no-tags
-          
+          $repo init -u https://github.com/xx2901318208/kernel_manifest.git -b realme/sm8650 -m gt5pro.xml --depth=1 --no-clone-bundle --no-tags
           # Sync repo and apply patches
           $REPO --version
           $REPO --trace sync -c --no-clone-bundle --no-tags --optimized-fetch -j$(nproc --all) --fail-fast
