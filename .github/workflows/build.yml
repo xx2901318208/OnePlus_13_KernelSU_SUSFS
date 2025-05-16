@@ -108,6 +108,7 @@ jobs:
           # Initialize and sync kernel source
           echo "Initializing and syncing kernel source..."
           $REPO init -u https://github.com/xx2901318208/kernel_manifest.git -b realme/sm8650 -m gt5pro.xml --depth=1
+          
           # Sync repo and apply patches
           $REPO --version
           $REPO --trace sync -c --no-clone-bundle --no-tags --optimized-fetch -j$(nproc --all) --fail-fast
@@ -193,7 +194,7 @@ jobs:
           cd "$CONFIG/kernel_platform/common"
           # Apply additional patch
           cp ../../../kernel_patches/next/syscall_hooks.patch ./
-          patch -p1 --fuzz=3 < ./syscall_hooks.patch
+          patch -p1 < ./syscall_hooks.patch
 
       - name: Apply Hide Stuff Patches
         run: |
@@ -245,11 +246,9 @@ jobs:
           # Add bbr and fq config setting
           echo "CONFIG_TCP_CONG_ADVANCED=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_TCP_CONG_BBR=y" >> ./common/arch/arm64/configs/gki_defconfig
-          if [ "${{ inputs.kernel_version }}" == "6.1" ]; then
-            echo "CONFIG_DEFAULT_CUBIC=n" >> ./common/arch/arm64/configs/gki_defconfig
-            echo "CONFIG_DEFAULT_BBR=y" >> ./common/arch/arm64/configs/gki_defconfig
-            echo 'CONFIG_DEFAULT_TCP_CONG="bbr"' >> ./common/arch/arm64/configs/gki_defconfig
-          fi
+          #echo "CONFIG_DEFAULT_CUBIC=n" >> ./common/arch/arm64/configs/gki_defconfig
+          #echo "CONFIG_DEFAULT_BBR=y" >> ./common/arch/arm64/configs/gki_defconfig
+          #echo 'CONFIG_DEFAULT_TCP_CONG="bbr"' >> ./common/arch/arm64/configs/gki_defconfig
           #echo "CONFIG_NET_SCH_DEFAULT=y" >> ./common/arch/arm64/configs/gki_defconfig
           #echo "CONFIG_DEFAULT_FQ=y" >> ./common/arch/arm64/configs/gki_defconfig
           #echo 'CONFIG_DEFAULT_NET_SCH="fq"' >> ./common/arch/arm64/configs/gki_defconfig
@@ -260,10 +259,7 @@ jobs:
           
           # Add rcu config setting
           echo "CONFIG_RCU_TRACE=n" >> ./common/arch/arm64/configs/gki_defconfig
-          if [ "${{ inputs.kernel_version }}" == "6.1" ]; then
-            echo "CONFIG_RCU_LAZY_DEFAULT_OFF=n" >> ./common/arch/arm64/configs/gki_defconfig
-          fi
-
+          
           # Add personal config setting
           echo "CONFIG_IP_NF_TARGET_ECN=y" >> ./common/arch/arm64/configs/gki_defconfig
 
@@ -275,7 +271,7 @@ jobs:
           grep "sysctl_tcp_ecn" tcp_ipv4.c
           sed -i '/\.procname[[:space:]]*=[[:space:]]*"tcp_ecn"/, /^[[:space:]]*\}/ s/SYSCTL_TWO/SYSCTL_ONE/' sysctl_net_ipv4.c
           grep -A6 '\.procname.*tcp_ecn' sysctl_net_ipv4.c
-          sed -i 's/net->ipv4.sysctl_tcp_pacing_ss_ratio = 200;/net->ipv4.sysctl_tcp_pacing_ss_ratio = 180;/' tcp_ipv4.c
+          sed -i 's/net->ipv4.sysctl_tcp_pacing_ss_ratio = 200;/net->ipv4.sysctl_tcp_pacing_ss_ratio = 160;/' tcp_ipv4.c
           sed -i 's/net->ipv4.sysctl_tcp_pacing_ca_ratio = 120;/net->ipv4.sysctl_tcp_pacing_ca_ratio = 110;/' tcp_ipv4.c
           grep "sysctl_tcp_pacing" tcp_ipv4.c
           ls -t | grep -E 'tcp_|sysctl_'
