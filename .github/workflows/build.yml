@@ -149,20 +149,15 @@ jobs:
           git merge google-bbr/v3 --allow-unrelated-histories -m "Merge BBR v3 into kernel"
           #sed -i 's/^\([[:space:]]*\)\.name\([[:space:]]*\)=\([[:space:]]*\)"bbr",/\1.name\2=\3"bbr3",/' ./common/net/ipv4/tcp_bbr.c
 
-      - name: Add KernelSU
+      - name: Set up KernelSU-SukiSU Ultra
         run: |
-          echo "Changing to configuration directory: $CONFIG..."
-          cd "$CONFIG/kernel_platform"
-          
-          echo "Adding KernelSU..."
+          cd kernel_workspace/kernel_platform
           curl -LSs "https://raw.githubusercontent.com/ShirkNeko/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-dev
-          
           cd ./KernelSU
           KSU_VERSION=$(expr $(/usr/bin/git rev-list --count main) "+" 10606)
           echo "KSUVER=$KSU_VERSION" >> $GITHUB_ENV
           export KSU_VERSION=$KSU_VERSION
           sed -i "s/DKSU_VERSION=12800/DKSU_VERSION=${KSU_VERSION}/" kernel/Makefile
-
       - name: Apply SUSFS Patches
         run: |
           echo "Changing to configuration directory: $CONFIG..."
