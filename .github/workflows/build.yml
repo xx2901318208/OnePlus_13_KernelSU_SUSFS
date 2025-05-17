@@ -149,15 +149,20 @@ jobs:
           git merge google-bbr/v3 --allow-unrelated-histories -m "Merge BBR v3 into kernel"
           #sed -i 's/^\([[:space:]]*\)\.name\([[:space:]]*\)=\([[:space:]]*\)"bbr",/\1.name\2=\3"bbr3",/' ./common/net/ipv4/tcp_bbr.c
 
-      - name: Set up KernelSU-SukiSU Ultra
+      - name: Add KernelSU
         run: |
-          cd kernel_workspace/kernel_platform
-          curl -LSs "https://raw.githubusercontent.com/ShirkNeko/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-dev
-          cd ./KernelSU
-          KSU_VERSION=$(expr $(/usr/bin/git rev-list --count main) "+" 10606)
+          echo "Changing to configuration directory: $CONFIG..."
+          cd "$CONFIG/kernel_platform"
+          
+          echo "Adding KernelSU..."
+          curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s next
+          
+          git submodule update --init --recursive
+          cd KernelSU-Next/kernel
+          KSU_VERSION=$(expr $(/usr/bin/git rev-list --count HEAD) "+" 10200)
           echo "KSUVER=$KSU_VERSION" >> $GITHUB_ENV
-          export KSU_VERSION=$KSU_VERSION
-          sed -i "s/DKSU_VERSION=12800/DKSU_VERSION=${KSU_VERSION}/" kernel/Makefile
+          sed -i "s/DKSU_VERSION=11998/DKSU_VERSION=${KSU_VERSION}/" Makefile
+
       - name: Apply SUSFS Patches
         run: |
           echo "Changing to configuration directory: $CONFIG..."
@@ -170,7 +175,7 @@ jobs:
           cp ../../susfs4ksu/kernel_patches/fs/* ./common/fs/
           cp ../../susfs4ksu/kernel_patches/include/linux/* ./common/include/linux/
           
-          cd ./KernelSU
+          cd ./KernelSU-Next
           
           echo "Applying next SUSFS patches..."
           cp ../../../kernel_patches/next/kernel-patch-susfs-v1.5.7-to-KernelSU-Next.patch ./
@@ -196,7 +201,7 @@ jobs:
           echo "Changing to configuration directory: $CONFIG..."
           cd "$CONFIG/kernel_platform/common"
           # Apply additional patch
-          cp ../../../SukiSU_patch/69_hide_stuff.patch ./
+          cp ../../../kernel_patches/69_hide_stuff.patch ./
           patch -p1 --fuzz=3 < 69_hide_stuff.patch
           patch -p1 < ../../.repo/manifests/patches/001-lz4.patch
           patch -p1 < ../../.repo/manifests/patches/002-zstd.patch
